@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { useDispatch } from "react-redux";
+import { addCountryData } from "../../Redux/countryRedux/action";
 import {
   FormControl,
   FormLabel,
@@ -8,10 +10,9 @@ import {
   Heading,
   useToast,
 } from "@chakra-ui/react";
-import axios from "axios";
-import { API } from "../Variables";
 
 function AddCountry() {
+  const dispatch = useDispatch();
   const toast = useToast();
   const [data, setData] = useState({
     country: "",
@@ -22,29 +23,7 @@ function AddCountry() {
   };
 
   const handleClick = () => {
-    axios
-      .post(`${API}/countries`, data)
-      .then((res) => {
-        toast({
-          title: "Country Added!!!",
-          position: "top",
-          status: "success",
-          duration: 1000,
-          isClosable: true,
-        });
-        setData({
-          country: "",
-        });
-      })
-      .catch((e) => {
-        toast({
-          title: e.message,
-          position: "top",
-          status: "error",
-          duration: 1000,
-          isClosable: true,
-        });
-      });
+    dispatch(addCountryData(toast, data, setData));
   };
   return (
     <>

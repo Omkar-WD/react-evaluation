@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { getCitiesData, deleteCityData } from "../../Redux/cityRedux/action";
 import {
   Table,
   Thead,
@@ -13,23 +15,15 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
-import { API } from "../Variables";
 
 function Home() {
+  const reduxCities = useSelector((store) => store.cities.cities);
+  const dispatch = useDispatch();
   const toast = useToast();
   const Navigate = useNavigate();
-  const [cities, setCities] = useState([]);
 
   const getCities = () => {
-    axios
-      .get(`${API}/cities`)
-      .then((res) => {
-        setCities(res.data);
-      })
-      .catch((e) => {
-        console.log(e);
-      });
+    dispatch(getCitiesData());
   };
 
   useEffect(() => {
@@ -39,23 +33,23 @@ function Home() {
   const handleSort = (e) => {
     const { value } = e.target;
     if (value == "1") {
-      let x = cities.sort((a, b) => {
+      let x = reduxCities.sort((a, b) => {
         if (a.country > b.country) return 1;
         return -1;
       });
-      setCities([...x]);
+      dispatch(getCitiesData([...x]));
     } else if (value == "2") {
-      let x = cities.sort((a, b) => {
+      let x = reduxCities.sort((a, b) => {
         if (Number(a.population) > Number(b.population)) return 1;
         return -1;
       });
-      setCities([...x]);
+      dispatch(getCitiesData([...x]));
     } else {
-      let x = cities.sort((a, b) => {
+      let x = reduxCities.sort((a, b) => {
         if (Number(a.population) > Number(b.population)) return -1;
         return 1;
       });
-      setCities([...x]);
+      dispatch(getCitiesData([...x]));
     }
   };
   const handleEdit = (id) => {
@@ -63,28 +57,7 @@ function Home() {
   };
 
   const handleDelete = (id) => {
-    axios
-      .delete(`${API}/cities/${id}`)
-      .then((res) => {
-        toast({
-          title: "County Deleted!!!",
-          position: "top",
-          status: "success",
-          duration: 1000,
-          isClosable: true,
-        });
-        getCities();
-      })
-      .catch((e) => {
-        toast({
-          title: e.message,
-          position: "top",
-          status: "error",
-          duration: 1000,
-          isClosable: true,
-        });
-      });
-    console.log("delete", id);
+    dispatch(deleteCityData(toast, id));
   };
 
   return (
@@ -114,7 +87,7 @@ function Home() {
               </Tr>
             </Thead>
             <Tbody>
-              {cities.map((e) => (
+              {reduxCities.map((e) => (
                 <Tr key={e.id}>
                   <Td>{e.id}</Td>
                   <Td>{e.country}</Td>

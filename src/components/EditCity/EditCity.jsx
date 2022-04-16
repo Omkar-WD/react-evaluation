@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { getCountriesData } from "../../Redux/countryRedux/action";
+import { getCityData, editCityData } from "../../Redux/cityRedux/action";
 import {
   FormControl,
   FormLabel,
@@ -9,14 +12,13 @@ import {
   Heading,
   useToast,
 } from "@chakra-ui/react";
-import axios from "axios";
 import { useParams } from "react-router-dom";
-import { API } from "../Variables";
 
 function EditCity() {
+  const reduxCountries = useSelector((store) => store.countries.countries);
+  const dispatch = useDispatch();
   const toast = useToast();
   const { id } = useParams();
-  const [countries, setCountries] = useState([]);
   const [data, setData] = useState({
     country: "",
     city: "",
@@ -24,22 +26,8 @@ function EditCity() {
   });
 
   useEffect(() => {
-    axios
-      .get(`${API}/countries`)
-      .then((res) => {
-        setCountries(res.data);
-      })
-      .catch((e) => {
-        console.log(e.message);
-      });
-    axios
-      .get(`${API}/cities/${id}`)
-      .then((res) => {
-        setData(res.data);
-      })
-      .catch((e) => {
-        console.log(e.message);
-      });
+    dispatch(getCountriesData());
+    dispatch(getCityData(id, setData));
   }, []);
 
   const handleChange = (e) => {
@@ -48,26 +36,7 @@ function EditCity() {
   };
 
   const handleClick = () => {
-    axios
-      .patch(`${API}/cities/${id}`, data)
-      .then((res) => {
-        toast({
-          title: "City Updated!!!",
-          position: "top",
-          status: "success",
-          duration: 1000,
-          isClosable: true,
-        });
-      })
-      .catch((e) => {
-        toast({
-          title: e.message,
-          position: "top",
-          status: "error",
-          duration: 1000,
-          isClosable: true,
-        });
-      });
+    dispatch(editCityData(toast, data, id));
   };
   return (
     <>
@@ -83,7 +52,7 @@ function EditCity() {
             placeholder="Select country"
             value={data.country}
           >
-            {countries.map((e) => (
+            {reduxCountries.map((e) => (
               <option key={e.id} value={e.country}>
                 {e.country}
               </option>

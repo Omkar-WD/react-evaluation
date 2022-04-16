@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { getCountriesData } from "../../Redux/countryRedux/action";
+import { addCityData } from "../../Redux/cityRedux/action";
 import {
   FormControl,
   FormLabel,
@@ -9,12 +12,11 @@ import {
   Heading,
   useToast,
 } from "@chakra-ui/react";
-import axios from "axios";
-import { API } from "../Variables";
 
 function AddCity() {
+  const reduxCountries = useSelector((store) => store.countries.countries);
+  const dispatch = useDispatch();
   const toast = useToast();
-  const [countries, setCountries] = useState([]);
   const [data, setData] = useState({
     country: "",
     city: "",
@@ -22,47 +24,18 @@ function AddCity() {
   });
 
   useEffect(() => {
-    axios
-      .get(`${API}/countries`)
-      .then((res) => {
-        setCountries(res.data);
-      })
-      .catch((e) => {
-        console.log(e.message);
-      });
+    dispatch(getCountriesData());
   }, []);
 
   const handleChange = (e) => {
     const { id, value } = e.target;
     setData({ ...data, [id]: value });
   };
+
   const handleClick = () => {
-    axios
-      .post(`${API}/cities`, data)
-      .then((res) => {
-        toast({
-          title: "City Added!!!",
-          position: "top",
-          status: "success",
-          duration: 1000,
-          isClosable: true,
-        });
-        setData({
-          country: "",
-          city: "",
-          population: "",
-        });
-      })
-      .catch((e) => {
-        toast({
-          title: e.message,
-          position: "top",
-          status: "error",
-          duration: 1000,
-          isClosable: true,
-        });
-      });
+    dispatch(addCityData(toast, data, setData));
   };
+
   return (
     <>
       <Heading as="h3" size="lg" mb="5">
@@ -77,7 +50,7 @@ function AddCity() {
             placeholder="Select country"
             value={data.country}
           >
-            {countries.map((e) => (
+            {reduxCountries.map((e) => (
               <option key={e.id} value={e.country}>
                 {e.country}
               </option>
